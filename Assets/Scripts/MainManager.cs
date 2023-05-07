@@ -11,6 +11,7 @@ public class MainManager : MonoBehaviour
     public Rigidbody Ball;
 
     public Text ScoreText;
+    public Text LeaderText;
     public GameObject GameOverText;
     
     private bool m_Started = false;
@@ -35,6 +36,12 @@ public class MainManager : MonoBehaviour
                 brick.PointValue = pointCountArray[i];
                 brick.onDestroyed.AddListener(AddPoint);
             }
+        }
+
+        //Set the leader score from previous results 
+        if(UIManager.HasInstance && UIManager.Instance.PreviousSessionData.maxScore != 0)
+        {
+            UpdateLeaderScore(UIManager.Instance.PreviousSessionData.playerName, UIManager.Instance.PreviousSessionData.maxScore);
         }
     }
 
@@ -72,5 +79,17 @@ public class MainManager : MonoBehaviour
     {
         m_GameOver = true;
         GameOverText.SetActive(true);
+
+        if(UIManager.HasInstance &&  (m_Points > UIManager.Instance.PreviousSessionData.maxScore) )
+        {
+            //Store the current score in a json and update the leaderboard
+            UIManager.Instance.SaveSessionToFile(m_Points);
+            UpdateLeaderScore(UIManager.Instance.CurrentPlayerName, m_Points);
+        }
+
+    }
+    void UpdateLeaderScore(string name, int score)
+    {
+        LeaderText.text = "Best Score: "+name +" : " + score;
     }
 }
